@@ -8,5 +8,7 @@
 <RedditImageGallery
 	posts={data.posts}
 	title={`u/${data.username}`}
+	showSub={true}
+	showUsername={false}
 	url={`https://old.reddit.com/u/${data.username}`}
 />

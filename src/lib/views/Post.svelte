@@ -1,6 +1,7 @@
 <script lang="ts">
 	export let post: RedditPost
 	export let showSub = false
+	export let showUsername = false
 
 	import type { RedditPost } from '$lib/types/reddit'
 
@@ -29,7 +30,8 @@
 	let showEmbed = false
 </script>
 
-<div class="post">
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div class="post" on:click={() => console.log(post)}>
 	{#if hasEmbed(post)}
 		{#if showEmbed}
 			<iframe
@@ -54,13 +56,12 @@
 	{#if canDisplay}
 		<div class="details">
 			{#if showSub}
-				<a href={post.subreddit}>/r/{post.subreddit}</a>
+				<a href={post.subreddit}>r/{post.subreddit}</a>
 				<span class="seperator" />
 			{/if}
-			<a href={authorUrl(post)}>
-				u/{post.author}
-			</a>
-			<span class="seperator" />
+			{#if showUsername}
+				<a href={authorUrl(post)}>u/{post.author}</a><span class="seperator" />
+			{/if}
 			<a class="title" href={postUrl(post)} target="_blank" rel="noreferrer">
 				{post.title}
 			</a>

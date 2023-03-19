@@ -3,6 +3,7 @@
 	export let title: string
 	export let url: string
 	export let showSub = false
+	export let showUsername = true
 
 	import type { RedditPost } from '$lib/types/reddit'
 	import Post from './Post.svelte'
@@ -19,7 +20,7 @@
 <h1><a href={url}>{title}</a></h1>
 <section>
 	{#each filteredPosts as post (post.id)}
-		<Post {post} {showSub} />
+		<Post {post} {showSub} {showUsername} />
 	{/each}
 </section>
 
