@@ -46,6 +46,7 @@ export function createRedditService(fetchImpl: typeof fetch = fetch) {
 				posts: c.map((c) => c.data),
 			}
 		} catch (e) {
+			console.error(e)
 			return {
 				error: new Error('Failed to fetch listing', { cause: e as Error }),
 			}

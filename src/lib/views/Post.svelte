@@ -45,7 +45,7 @@
 			<img src={post.thumbnail} alt="img" on:click={() => (showEmbed = true)} />
 		{/if}
 	{:else if isGifv(post)}
-		<video preload="auto" poster={post.thumbnail} controls muted loop on:error={onError(post)}>
+		<video preload="metadata" controls muted loop on:error={onError(post)}>
 			<source src={mp4Link(post.url)} type="video/mp4" />
 			<track kind="captions" />
 		</video>
@@ -56,7 +56,7 @@
 	{#if canDisplay}
 		<div class="details">
 			{#if showSub}
-				<a href={post.subreddit}>r/{post.subreddit}</a>
+				<a href={`/r/${post.subreddit}`}>r/{post.subreddit}</a>
 				<span class="seperator" />
 			{/if}
 			{#if showUsername}
