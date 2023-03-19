@@ -1,6 +1,6 @@
 <script>
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcome_fallback from '$lib/images/svelte-welcome.png';
+	import welcome from '$lib/images/svelte-welcome.webp'
+	import welcome_fallback from '$lib/images/svelte-welcome.png'
 </script>
 
 <svelte:head>
@@ -20,8 +20,7 @@
 		to your new<br />SvelteKit app
 	</h1>
 
-	<h2>
-	</h2>
+	<h2 />
 </section>
 
 <style>

@@ -1,11 +1,10 @@
 <script>
-	import { page } from '$app/stores';
-	import github from '$lib/images/github.svg';
+	import { page } from '$app/stores'
+	import github from '$lib/images/github.svg'
 </script>
 
 <header>
-	<div class="corner">
-	</div>
+	<div class="corner" />
 
 	<nav>
 		<svg viewBox="0 0 2 3" aria-hidden="true">
