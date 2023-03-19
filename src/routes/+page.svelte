@@ -1,12 +1,11 @@
 <script>
-	import Counter from './Counter.svelte';
 	import welcome from '$lib/images/svelte-welcome.webp';
 	import welcome_fallback from '$lib/images/svelte-welcome.png';
 </script>
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<title>Reddit</title>
+	<meta name="description" content="Reddit img viewer" />
 </svelte:head>
 
 <section>
@@ -24,8 +23,6 @@
 	<h2>
 		try editing <strong>src/routes/+page.svelte</strong>
 	</h2>
-
-	<Counter />
 </section>
 
 <style>
