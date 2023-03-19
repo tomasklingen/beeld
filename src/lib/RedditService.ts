@@ -40,10 +40,10 @@ export function createRedditService(fetchImpl: typeof fetch = fetch) {
 				}
 			}
 			const respData = await r.json()
-			const c: { data: any }[] = respData.data.children
+			const c: { data: RedditPost }[] = respData.data.children
 			return {
 				error: null,
-				posts: c.map((c) => c.data) as RedditPost[],
+				posts: c.map((c) => c.data),
 			}
 		} catch (e) {
 			return {

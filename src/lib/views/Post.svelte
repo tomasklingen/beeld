@@ -4,8 +4,8 @@
 
 	import type { RedditPost } from '$lib/types/reddit'
 
-	const onError = (post: RedditPost) => (e) => {
-		console.error('failed to load post', post)
+	const onError = (post: RedditPost) => (e: Event) => {
+		console.error('failed to load post', post, e)
 	}
 
 	const hasEmbed = (p: RedditPost) => p.post_hint === 'rich:video'

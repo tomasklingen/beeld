@@ -11,7 +11,9 @@
 		return !p.is_gallery && p.name.startsWith('t3') && p.thumbnail !== 'self'
 	}
 
-	$: filteredPosts = posts.filter(imgPostFilter)
+	$: filteredPosts = posts.filter(imgPostFilter);
+
+	$: console.log(`Displaying ${filteredPosts.length} media items.`)
 </script>
 
 <h1><a href={url}>{title}</a></h1>
