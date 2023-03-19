@@ -17,6 +17,12 @@
 			<li aria-current={$page.url.pathname === '/r/oldschoolcool' ? 'page' : undefined}>
 				<a href="/r/oldschoolcool">/r/oldschoolcool</a>
 			</li>
+			<li aria-current={$page.url.pathname === '/r/itookapicture' ? 'page' : undefined}>
+				<a href="/r/itookapicture">/r/itookapicture</a>
+			</li>
+			<li aria-current={$page.url.pathname === '/r/Pareidolia' ? 'page' : undefined}>
+				<a href="/r/Pareidolia">/r/Pareidolia</a>
+			</li>
 		</ul>
 		<svg viewBox="0 0 2 3" aria-hidden="true">
 			<path d="M0,0 L0,3 C0.5,3 0.5,3 1,2 L2,0 Z" />
