@@ -5,4 +5,5 @@
 	export let data: PageData;
 </script>
 
-<RedditImageGallery posts={data.posts} title={data.sub} />
+
+<RedditImageGallery posts={data.posts} title={`u/${data.username}`} url={`https://old.reddit.com/u/${data.username}`} />
