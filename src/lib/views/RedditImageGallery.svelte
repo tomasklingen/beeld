@@ -1,21 +1,20 @@
 <script lang=ts>
+	export let posts: RedditPost[]
+    export let title: string;
+    export let url: string;
+    export let showSub = false
+
     import type { RedditPost } from '$lib/types/reddit';
     import Post from './Post.svelte';
 
-	export let posts: RedditPost[]
-    export let title: string;
-    export let showSub = false
-
-    $: console.log(filteredPosts.map(p => [p.url.slice(p.url.length - 5), p.domain, p]))
-
-    const filter = (p: RedditPost) => {
+    const imgPostFilter = (p: RedditPost) => {
         return !p.is_gallery && p.name.startsWith('t3') && p.thumbnail !== 'self'
     }
-    const hasMedia = (p: RedditPost) => p.media
-    $: filteredPosts = posts.filter(filter)
+
+    $: filteredPosts = posts.filter(imgPostFilter)
 </script>
 
-<h1>{title}</h1>
+<h1><a href={url}>{title}</a></h1>
 <section>
     {#each filteredPosts as post (post.id) }
         <Post {post} { showSub } />
