@@ -57,3 +57,21 @@ export function createRedditService(fetchImpl: typeof fetch = fetch) {
 		getListing,
 	}
 }
+
+
+export const hasEmbed = (p: RedditPost) => p.post_hint === 'rich:video'
+export const isGifv = (p: RedditPost) => {
+	return (p.url as string).endsWith('gifv')
+}
+export const isNormalImage = (p: RedditPost) => p.post_hint === 'image'
+
+export const mp4Link = (link: string) => {
+	const newlink = link.replace('gifv', 'mp4')
+	return newlink
+}
+
+export const authorUrl = (p: RedditPost) => {
+	return `/u/${p.author}`
+}
+
+export const postUrl = (p: RedditPost) => `https://old.reddit.com${p.permalink}`

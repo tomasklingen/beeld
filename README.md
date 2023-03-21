@@ -1,4 +1,4 @@
-# 🌁 Beeld 
+# 🌁 Beeld
 
 A reddit image gallery made with Svelte.
 
