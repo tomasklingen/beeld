@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { authorUrl, hasEmbed, isGifv, isNormalImage, mp4Link, postUrl } from '$lib/RedditService'
+
 	export let post: RedditPost
 	export let showSub = false
 	export let showUsername = false
@@ -9,29 +11,10 @@
 		console.error('failed to load post', post, e)
 	}
 
-	const hasEmbed = (p: RedditPost) => p.post_hint === 'rich:video'
-	const isGifv = (p: RedditPost) => {
-		return (p.url as string).endsWith('gifv')
-	}
-	const mp4Link = (link: string) => {
-		const newlink = link.replace('gifv', 'mp4')
-		return newlink
-	}
-	const isNormalImage = (p: RedditPost) => p.post_hint === 'image'
-
-	const authorUrl = (p: RedditPost) => {
-		return `/u/${p.author}`
-	}
-
-	const canDisplay = hasEmbed(post) || isGifv(post) || isNormalImage(post)
-
-	const postUrl = (p: RedditPost) => `https://old.reddit.com${p.permalink}`
-
 	let showEmbed = false
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="post" on:click={() => console.log(post)}>
+<figure>
 	{#if hasEmbed(post)}
 		{#if showEmbed}
 			<iframe
@@ -49,48 +32,39 @@
 			<source src={mp4Link(post.url)} type="video/mp4" />
 			<track kind="captions" />
 		</video>
-	{:else if post.post_hint === 'image'}
-		<img src={post.url} alt="img" on:error={onError(post)} />
+	{:else if isNormalImage(post)}
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<img src={post.url} alt="img" on:error={onError(post)} on:click />
 	{/if}
 
-	{#if canDisplay}
-		<div class="details">
-			{#if showSub}
-				<a href={`/r/${post.subreddit}`}>r/{post.subreddit}</a>
-				<span class="seperator" />
-			{/if}
-			{#if showUsername}
-				<a href={authorUrl(post)}>u/{post.author}</a><span class="seperator" />
-			{/if}
-			<a class="title" href={postUrl(post)} target="_blank" rel="noreferrer">
-				{post.title}
-			</a>
-		</div>
-	{/if}
-</div>
+	<figcaption>
+		{#if showSub}
+			<a href={`/r/${post.subreddit}`}>r/{post.subreddit}</a>
+			•
+		{/if}
+		{#if showUsername}
+			<a href={authorUrl(post)}>u/{post.author}</a> •
+		{/if}
+		<a class="title" href={postUrl(post)} target="_blank" rel="noreferrer">
+			{post.title}
+		</a>
+	</figcaption>
+</figure>
 
 <style>
-	.post {
-		display: inline-block;
-		margin-bottom: 2em;
+	figure {
+		margin: 0;
+		height: 100%;
 		width: 100%;
+	}
+	figcaption {
+		font-size: 0.7em;
 	}
 	.embed {
 		width: 100%;
 		height: 30em;
 	}
-	.seperator {
-		display: inline-block;
 
-		margin: 0 6px;
-	}
-	.seperator::after {
-		content: '•';
-	}
-	.details {
-		font-size: 0.7em;
-		overflow: hidden;
-	}
 	.title {
 		text-overflow: ellipsis;
 	}
@@ -100,6 +74,7 @@
 	}
 	img {
 		width: 100%;
+		height: 100%;
 		object-fit: contain;
 	}
 </style>

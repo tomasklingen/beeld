@@ -58,7 +58,6 @@ export function createRedditService(fetchImpl: typeof fetch = fetch) {
 	}
 }
 
-
 export const hasEmbed = (p: RedditPost) => p.post_hint === 'rich:video'
 export const isGifv = (p: RedditPost) => {
 	return (p.url as string).endsWith('gifv')
