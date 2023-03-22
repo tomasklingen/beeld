@@ -1,11 +1,21 @@
 <script lang="ts">
-	import { authorUrl, hasEmbed, isGifv, isNormalImage, mp4Link, postUrl } from '$lib/RedditService'
+	import {
+		authorUrl,
+		getImageDimensions,
+		hasEmbed,
+		isGifv,
+		isNormalImage,
+		mp4Link,
+		postUrl,
+	} from '$lib/RedditService'
 
 	export let post: RedditPost
 	export let showSub = false
 	export let showUsername = false
 
 	import type { RedditPost } from '$lib/types/reddit'
+
+	import Image from './Image.svelte'
 
 	const onError = (post: RedditPost) => (e: Event) => {
 		console.error('failed to load post', post, e)
@@ -33,8 +43,15 @@
 			<track kind="captions" />
 		</video>
 	{:else if isNormalImage(post)}
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<img src={post.url} alt="img" on:error={onError(post)} on:click />
+		{@const dimensions = getImageDimensions(post)}
+		<Image
+			src={post.url}
+			width={dimensions?.width}
+			height={dimensions?.height}
+			alt={post.title}
+			thumbnail={post.thumbnail}
+			on:click
+		/>
 	{/if}
 
 	<figcaption>
@@ -71,10 +88,5 @@
 	video {
 		width: 100%;
 		max-height: inherit;
-	}
-	img {
-		width: 100%;
-		height: 100%;
-		object-fit: contain;
 	}
 </style>

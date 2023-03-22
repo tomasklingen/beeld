@@ -63,6 +63,7 @@ export const isGifv = (p: RedditPost) => {
 	return (p.url as string).endsWith('gifv')
 }
 export const isNormalImage = (p: RedditPost) => p.post_hint === 'image'
+export const getImageDimensions = (p: RedditPost) => p.preview.images?.[0].source
 
 export const mp4Link = (link: string) => {
 	const newlink = link.replace('gifv', 'mp4')
