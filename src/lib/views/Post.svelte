@@ -22,6 +22,8 @@
 	}
 
 	let showEmbed = false
+	let showCaption = false
+	const setShowCaption = () => (showCaption = true)
 </script>
 
 <figure>
@@ -34,27 +36,32 @@
 				title="embed"
 			/>
 		{:else}
-			<!-- svelte-ignore a11y-click-events-have-key-events -->
-			<img src={post.thumbnail} alt="img" on:click={() => (showEmbed = true)} />
+			<Image
+				src={post.thumbnail}
+				alt={post.title}
+				on:loaded={setShowCaption}
+				on:click={() => (showEmbed = true)}
+			/>
 		{/if}
 	{:else if isGifv(post)}
-		<video preload="metadata" controls muted loop on:error={onError(post)}>
+		<video preload="metadata" controls muted loop on:canplay={setShowCaption} on:error={onError(post)}>
 			<source src={mp4Link(post.url)} type="video/mp4" />
 			<track kind="captions" />
 		</video>
 	{:else if isNormalImage(post)}
-		{@const dimensions = getImageDimensions(post)}
+		{@const { width, height } = getImageDimensions(post)}
 		<Image
 			src={post.url}
-			width={dimensions?.width}
-			height={dimensions?.height}
+			{width}
+			{height}
 			alt={post.title}
 			thumbnail={post.thumbnail}
+			on:loaded={setShowCaption}
 			on:click
 		/>
 	{/if}
 
-	<figcaption>
+	<figcaption style:visibility={showCaption ? 'visible' : 'hidden'}>
 		{#if showSub}
 			<a href={`/r/${post.subreddit}`}>r/{post.subreddit}</a>
 			•
