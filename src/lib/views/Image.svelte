@@ -49,6 +49,7 @@
 
 <style>
 	figure {
+		height: 100%;
 		position: relative;
 		margin: 0;
 	}
@@ -66,7 +67,6 @@
 		top: 0;
 	}
 	img.loaded {
-		min-height: 0;
 		opacity: 1;
 	}
 </style>
