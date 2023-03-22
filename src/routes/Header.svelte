@@ -64,7 +64,7 @@
 	nav {
 		display: flex;
 		justify-content: center;
-		--background: rgba(255, 255, 255, 0.7);
+		--background: var(--color-bg-2);
 	}
 
 	svg {
@@ -86,7 +86,7 @@
 		justify-content: center;
 		align-items: center;
 		list-style: none;
-		background: var(--background);
+		background: var(--color-bg-2);
 		background-size: contain;
 	}
 
