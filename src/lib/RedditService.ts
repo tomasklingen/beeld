@@ -1,11 +1,13 @@
 import type { RedditPost } from './types/reddit'
 
+type ListPeriod = 'hour' | 'day' | 'week' | 'month' | 'year' | 'all'
 type ListSorting = 'hot' | 'top' | 'new' | 'rising' | 'best'
 interface RedditRequest {
 	sorting?: ListSorting
 	limit?: number
 	username?: string
 	subReddit?: string
+	t?: ListPeriod
 }
 
 type RedditResponse =
@@ -19,7 +21,7 @@ type RedditResponse =
 
 export function createRedditService(fetchImpl: typeof fetch = fetch) {
 	async function getListing(r: RedditRequest): Promise<RedditResponse> {
-		const { sorting = 'top', limit = 30, username, subReddit } = r
+		const { sorting = 'top', limit = 30, username, subReddit, t = 'week' } = r
 
 		const listType = subReddit ? `r/${subReddit}` : username ? `user/${username}/submitted` : null
 
@@ -27,7 +29,7 @@ export function createRedditService(fetchImpl: typeof fetch = fetch) {
 			throw Error(`need a username or subreddit`)
 		}
 
-		return makeRequest(`https://www.reddit.com/${listType}/${sorting}.json?limit=${limit}`)
+		return makeRequest(`https://www.reddit.com/${listType}/${sorting}.json?limit=${limit}&t=${t}`)
 	}
 
 	async function makeRequest(url: string): Promise<RedditResponse> {
