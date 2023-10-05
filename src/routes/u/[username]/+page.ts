@@ -10,7 +10,7 @@ export async function load({ params, fetch }: PageLoadEvent) {
 	const resp = await reddit.getListing({ username })
 
 	if (resp.error) {
-		throw error(404, resp.error)
+		error(404, resp.error)
 	}
 
 	return {
