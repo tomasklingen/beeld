@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { hasEmbed, isGifv, isNormalImage } from '$lib/RedditService'
-	import Image from './Image.svelte';
+	import Image from './Image.svelte'
 
 	export let posts: RedditPost[]
 	export let title: string
@@ -74,10 +74,7 @@
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<div class="backdrop" on:click={() => onModalHide()}>
 		<div class="modal-content">
-			<Image
-				src={fullScreenPost.url}
-				alt={fullScreenPost.title}
-			/>
+			<Image src={fullScreenPost.url} alt={fullScreenPost.title} />
 		</div>
 	</div>
 {/if}

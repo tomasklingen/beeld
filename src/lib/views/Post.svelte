@@ -44,7 +44,14 @@
 			/>
 		{/if}
 	{:else if isGifv(post)}
-		<video preload="metadata" controls muted loop on:canplay={setShowCaption} on:error={onError(post)}>
+		<video
+			preload="metadata"
+			controls
+			muted
+			loop
+			on:canplay={setShowCaption}
+			on:error={onError(post)}
+		>
 			<source src={mp4Link(post.url)} type="video/mp4" />
 			<track kind="captions" />
 		</video>

@@ -7,9 +7,11 @@ export interface RedditPost {
 	permalink: string
 	post_hint: string
 	preview: {
-		images?: [{
-			source: { width: number; height: number }
-		}]
+		images?: [
+			{
+				source: { width: number; height: number }
+			},
+		]
 	}
 	secure_media_embed: { media_domain_url: string }
 	subreddit: string
