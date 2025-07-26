@@ -1,19 +1,28 @@
-import { createRedditService } from '$lib/RedditService'
 import { error } from '@sveltejs/kit'
 import type { PageLoadEvent } from './$types'
 
 export async function load({ params, fetch }: PageLoadEvent) {
 	const { slug } = params
 
-	const reddit = createRedditService(fetch)
-	const resp = await reddit.getListing({ subReddit: slug })
+	try {
+		const response = await fetch(`/api/reddit?subReddit=${encodeURIComponent(slug)}`)
 
-	if (resp.error) {
-		error(404, resp.error)
-	}
+		if (!response.ok) {
+			error(response.status, `Failed to load subreddit: ${response.statusText}`)
+		}
 
-	return {
-		sub: slug,
-		posts: resp.posts,
+		const data = await response.json()
+
+		if (data.error) {
+			error(404, data.error)
+		}
+
+		return {
+			sub: slug,
+			posts: data.posts,
+		}
+	} catch (err) {
+		console.error('Error loading subreddit:', err)
+		error(500, 'Failed to load subreddit data')
 	}
 }
