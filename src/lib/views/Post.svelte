@@ -16,6 +16,7 @@
 	import type { RedditPost } from '$lib/types/reddit'
 
 	import Image from './Image.svelte'
+	import { getImageUrl } from '$lib/utils/imageProxy'
 
 	const onError = (post: RedditPost) => (e: Event) => {
 		console.error('failed to load post', post, e)
@@ -52,15 +53,15 @@
 			on:canplay={setShowCaption}
 			on:error={onError(post)}
 		>
-			<source src={mp4Link(post.url)} type="video/mp4" />
+			<source src={getImageUrl(mp4Link(post.url))} type="video/mp4" />
 			<track kind="captions" />
 		</video>
 	{:else if isNormalImage(post)}
-		{@const { width, height } = getImageDimensions(post)}
+		{@const dimensions = getImageDimensions(post)}
 		<Image
 			src={post.url}
-			{width}
-			{height}
+			width={dimensions?.width}
+			height={dimensions?.height}
 			alt={post.title}
 			thumbnail={post.thumbnail}
 			on:loaded={setShowCaption}
