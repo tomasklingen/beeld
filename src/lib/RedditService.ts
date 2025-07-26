@@ -23,7 +23,11 @@ export function createRedditService(fetchImpl: typeof fetch = fetch) {
 	async function getListing(r: RedditRequest): Promise<RedditResponse> {
 		const { sorting = 'top', limit = 30, username, subReddit, t = 'week' } = r
 
-		const listType = subReddit ? `r/${subReddit}` : username ? `user/${username}/submitted` : null
+		const listType = subReddit
+			? (`r/${subReddit}` as const)
+			: username
+				? (`user/${username}/submitted` as const)
+				: null
 
 		if (!listType) {
 			throw Error(`need a username or subreddit`)
