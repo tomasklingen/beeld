@@ -1,10 +1,10 @@
 import js from '@eslint/js'
 import typescript from '@typescript-eslint/eslint-plugin'
 import typescriptParser from '@typescript-eslint/parser'
-import svelte from 'eslint-plugin-svelte'
-import svelteParser from 'svelte-eslint-parser'
 import prettierConfig from 'eslint-config-prettier'
+import svelte from 'eslint-plugin-svelte'
 import globals from 'globals'
+import svelteParser from 'svelte-eslint-parser'
 
 export default [
 	js.configs.recommended,
@@ -45,7 +45,7 @@ export default [
 			svelte,
 		},
 		rules: {
-			...svelte.configs.recommended.rules,
+			...svelte.configs.base.rules,
 			semi: ['error', 'never'],
 		},
 	},
