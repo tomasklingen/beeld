@@ -26,6 +26,7 @@
 	} = $props()
 
 	let fullScreenPost = $state<RedditPost | null>(null)
+	let currentGalleryIndex = $state(0)
 	let allPosts = $state(posts)
 	let nextAfter = $state(initialAfter)
 	let hasMore = $state(initialHasMore)
@@ -120,9 +121,47 @@
 	const onPostClick = (post: RedditPost) => {
 		console.log(post)
 		fullScreenPost = post
+		currentGalleryIndex = 0
 	}
 	const onModalHide = () => {
 		fullScreenPost = null
+	}
+
+	const getGalleryImages = (post: RedditPost) => {
+		if (post.type !== 'gallery' || !post.gallery_data?.items || !post.media_metadata) {
+			return []
+		}
+
+		return post.gallery_data.items
+			.map((item) => {
+				const imageData = post.media_metadata![item.media_id]
+				if (!imageData?.s?.u) return null
+				return {
+					url: imageData.s.u.replace(/amp;/g, ''),
+					id: item.media_id,
+				}
+			})
+			.filter((v) => !!v)
+	}
+
+	const getCurrentGalleryImage = () => {
+		if (!fullScreenPost || fullScreenPost.type !== 'gallery') return null
+		const images = getGalleryImages(fullScreenPost)
+		return images[currentGalleryIndex]
+	}
+
+	const getNextGalleryImage = () => {
+		if (!fullScreenPost || fullScreenPost.type !== 'gallery') return null
+		const images = getGalleryImages(fullScreenPost)
+		const nextIndex = currentGalleryIndex + 1
+		return nextIndex < images.length ? images[nextIndex] : null
+	}
+
+	const getPrevGalleryImage = () => {
+		if (!fullScreenPost || fullScreenPost.type !== 'gallery') return null
+		const images = getGalleryImages(fullScreenPost)
+		const prevIndex = currentGalleryIndex - 1
+		return prevIndex >= 0 ? images[prevIndex] : null
 	}
 
 	$effect(() => {
@@ -150,7 +189,19 @@
 	}
 
 	const nextImage = (offset = 1) => {
-		if (fullScreenPost && fullScreenPost.type === 'image') {
+		if (!fullScreenPost) return
+
+		if (fullScreenPost.type === 'gallery') {
+			const images = getGalleryImages(fullScreenPost)
+
+			if (images.length > 1) {
+				if (offset > 0 && currentGalleryIndex < images.length - 1) {
+					currentGalleryIndex += 1
+				} else if (offset < 0 && currentGalleryIndex > 0) {
+					currentGalleryIndex -= 1
+				}
+			}
+		} else if (fullScreenPost.type === 'image') {
 			const imgPosts = filteredPosts.filter((post) => post.type === 'image')
 			const currentIndex = imgPosts.indexOf(fullScreenPost)
 			const nextPost = imgPosts.at((currentIndex + offset) % imgPosts.length)
@@ -215,7 +266,37 @@
 			{#if fullScreenPost.type === 'image'}
 				<Image src={fullScreenPost.url} alt={fullScreenPost.title} />
 			{:else if fullScreenPost.type === 'gallery'}
-				<Image src={getGalleryImageUrl(fullScreenPost)} alt={fullScreenPost.title} />
+				{@const currentImage = getCurrentGalleryImage()}
+				{@const prevImage = getPrevGalleryImage()}
+				{@const nextImage = getNextGalleryImage()}
+				{@const images = getGalleryImages(fullScreenPost)}
+				<div class="gallery-container">
+					{#if prevImage}
+						<div class="gallery-preview gallery-preview-left">
+							<Image src={prevImage.url} alt="Previous" />
+						</div>
+					{/if}
+
+					<div class="gallery-main">
+						{#if currentImage}
+							<Image src={currentImage.url} alt={fullScreenPost.title} />
+						{:else}
+							<Image src={getGalleryImageUrl(fullScreenPost)} alt={fullScreenPost.title} />
+						{/if}
+					</div>
+
+					{#if nextImage}
+						<div class="gallery-preview gallery-preview-right">
+							<Image src={nextImage.url} alt="Next" />
+						</div>
+					{/if}
+
+					{#if images.length > 1}
+						<div class="gallery-indicator">
+							{currentGalleryIndex + 1} / {images.length}
+						</div>
+					{/if}
+				</div>
 			{:else}
 				<Image src={fullScreenPost.thumbnail} alt={fullScreenPost.title} />
 			{/if}
@@ -288,5 +369,68 @@
 	.load-more-btn:disabled {
 		opacity: 0.6;
 		cursor: not-allowed;
+	}
+
+	.gallery-container {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: 100%;
+	}
+
+	.gallery-main {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+	}
+
+	.gallery-main :global(.image-container),
+	.gallery-main :global(img) {
+		width: 100%;
+		height: 100%;
+		max-width: 100%;
+		max-height: 100%;
+		object-fit: contain;
+	}
+
+	.gallery-preview {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 80px;
+		height: 120px;
+		opacity: 0.3;
+		overflow: hidden;
+		border-radius: 8px;
+		pointer-events: none;
+		transition: opacity 0.2s ease;
+	}
+
+	.gallery-preview-left {
+		left: 10px;
+	}
+
+	.gallery-preview-right {
+		right: 10px;
+	}
+
+	.gallery-container:hover .gallery-preview {
+		opacity: 0.6;
+	}
+
+	.gallery-indicator {
+		position: absolute;
+		bottom: 20px;
+		left: 50%;
+		transform: translateX(-50%);
+		background: rgba(0, 0, 0, 0.7);
+		color: white;
+		padding: 8px 16px;
+		border-radius: 20px;
+		font-size: 14px;
+		backdrop-filter: blur(10px);
 	}
 </style>
