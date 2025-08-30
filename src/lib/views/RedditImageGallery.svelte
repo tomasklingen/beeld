@@ -206,7 +206,7 @@
 {#if fullScreenPost}
 	<div
 		class="backdrop"
-		onclick={() => onModalHide()}
+		onclick={(event) => (event.target as HTMLElement).tagName !== 'IMG' && onModalHide()}
 		role="button"
 		tabindex="0"
 		onkeydown={(e) => e.key === 'Enter' && onModalHide()}
