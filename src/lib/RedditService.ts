@@ -43,7 +43,6 @@ function parseRedditPost(rawPost: LegacyRedditPost): RedditPost {
 		}
 	}
 
-
 	if (rawPost.post_hint === 'image' && rawPost.preview?.images) {
 		return {
 			...basePost,
@@ -65,7 +64,10 @@ function parseRedditPost(rawPost: LegacyRedditPost): RedditPost {
 	}
 
 	// Check if it's a self post (text post)
-	if (rawPost.domain === `self.${rawPost.subreddit}` || rawPost.url?.includes(`/r/${rawPost.subreddit}/comments/`)) {
+	if (
+		rawPost.domain === `self.${rawPost.subreddit}` ||
+		rawPost.url?.includes(`/r/${rawPost.subreddit}/comments/`)
+	) {
 		return {
 			...basePost,
 			type: 'text',

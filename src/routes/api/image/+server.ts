@@ -11,13 +11,13 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 	// Validate that the URL is from Reddit's CDN to prevent abuse
 	if (
 		!imageUrl.startsWith('https://i.redd.it/') &&
-		!imageUrl.startsWith('https://preview.redd.it/')
+		!imageUrl.startsWith('https://preview.redd.it/') &&
+		!imageUrl.includes('redditmedia.com')
 	) {
 		error(400, 'Invalid image URL - only Reddit CDN URLs are allowed')
 	}
 
 	try {
-		console.log(`Proxying image request: ${imageUrl}`)
 		const response = await fetch(imageUrl, {
 			headers: {
 				'User-Agent': 'beeld-reddit-client/1.0',

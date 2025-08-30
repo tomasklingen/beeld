@@ -6,7 +6,11 @@ export function needsProxy(url: string): boolean {
 	if (!url || typeof url !== 'string') {
 		return false
 	}
-	return url.startsWith('https://i.redd.it/') || url.startsWith('https://preview.redd.it/')
+	return (
+		url.startsWith('https://i.redd.it/') ||
+		url.startsWith('https://preview.redd.it/') ||
+		url.includes('.thumbs.redditmedia.com')
+	)
 }
 
 /**
@@ -44,6 +48,7 @@ export function getImageUrl(url: string): string {
 
 	// Filter out Reddit's special thumbnail values that are not actual URLs
 	if (REDDIT_SPECIAL_THUMBNAILS.has(url)) {
+		console.log(url)
 		return ''
 	}
 

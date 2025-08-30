@@ -18,7 +18,6 @@ export interface EmbedPost extends BaseRedditPost {
 	secure_media_embed: { media_domain_url: string }
 }
 
-
 export interface ImagePost extends BaseRedditPost {
 	type: 'image'
 	post_hint: 'image'
@@ -54,29 +53,18 @@ export interface LinkPost extends BaseRedditPost {
 }
 
 // Discriminated union of all post types
-export type RedditPost =
-	| EmbedPost
-	| ImagePost
-	| GalleryPost
-	| TextPost
-	| LinkPost
+export type RedditPost = EmbedPost | ImagePost | GalleryPost | TextPost | LinkPost
 
 // Type guards for runtime type checking
-export const isEmbedPost = (post: RedditPost): post is EmbedPost =>
-	post.type === 'embed'
+export const isEmbedPost = (post: RedditPost): post is EmbedPost => post.type === 'embed'
 
+export const isImagePost = (post: RedditPost): post is ImagePost => post.type === 'image'
 
-export const isImagePost = (post: RedditPost): post is ImagePost =>
-	post.type === 'image'
+export const isGalleryPost = (post: RedditPost): post is GalleryPost => post.type === 'gallery'
 
-export const isGalleryPost = (post: RedditPost): post is GalleryPost =>
-	post.type === 'gallery'
+export const isTextPost = (post: RedditPost): post is TextPost => post.type === 'text'
 
-export const isTextPost = (post: RedditPost): post is TextPost =>
-	post.type === 'text'
-
-export const isLinkPost = (post: RedditPost): post is LinkPost =>
-	post.type === 'link'
+export const isLinkPost = (post: RedditPost): post is LinkPost => post.type === 'link'
 
 // Helper function to check if post has media content
 export const hasMediaContent = (post: RedditPost): boolean =>
