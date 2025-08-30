@@ -1,29 +1,42 @@
 <script lang="ts">
-	export let src: string
-	export let thumbnail: string | undefined = undefined
-	export let alt: string
-	export let width: number | undefined = undefined
-	export let height: number | undefined = undefined
-
 	import { getImageUrl } from '$lib/utils/imageProxy'
-	import { createEventDispatcher, onMount } from 'svelte'
+	import { onMount } from 'svelte'
 	import BlurredImg from './BlurredImg.svelte'
 
-	const dispatch = createEventDispatcher()
-	let thisImg: HTMLImageElement
-	let loaded = false
-	let hasError = false
-	let retryCount = 0
+	let {
+		src,
+		thumbnail = undefined,
+		alt,
+		width = undefined,
+		height = undefined,
+		onclick,
+		onloaded,
+		onerror,
+	}: {
+		src: string
+		thumbnail?: string | undefined
+		alt: string
+		width?: number | undefined
+		height?: number | undefined
+		onclick?: () => void
+		onloaded?: () => void
+		onerror?: () => void
+	} = $props()
+
+	let thisImg = $state<HTMLImageElement>()
+	let loaded = $state(false)
+	let hasError = $state(false)
+	let retryCount = $state(0)
 	const maxRetries = 2
 
 	// Use proxy for Reddit images to avoid CORS issues
-	$: proxiedSrc = getImageUrl(src)
-	$: proxiedThumbnail = thumbnail ? getImageUrl(thumbnail) : undefined
+	const proxiedSrc = $derived(getImageUrl(src))
+	const proxiedThumbnail = $derived(thumbnail ? getImageUrl(thumbnail) : undefined)
 
 	const handleLoad = () => {
 		loaded = true
 		hasError = false
-		dispatch('loaded')
+		onloaded?.()
 	}
 
 	const handleError = () => {
@@ -42,7 +55,7 @@
 			}, 1000 * retryCount) // Progressive backoff
 		} else {
 			hasError = true
-			dispatch('error', { src: proxiedSrc })
+			onerror?.()
 		}
 	}
 
@@ -75,7 +88,7 @@
 <figure>
 	{#if proxiedThumbnail}
 		<div style:zIndex={-1}>
-			<BlurredImg {width} {height} src={proxiedThumbnail} blur={!loaded} on:click />
+			<BlurredImg {width} {height} src={proxiedThumbnail} blur={!loaded} {onclick} />
 		</div>
 	{/if}
 
@@ -87,7 +100,8 @@
 			</div>
 		</div>
 	{:else}
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<img
 			src={proxiedSrc}
 			{alt}
@@ -95,7 +109,7 @@
 			bind:this={thisImg}
 			class:loaded
 			class:absolute={proxiedThumbnail}
-			on:click
+			{onclick}
 		/>
 	{/if}
 </figure>

@@ -3,12 +3,20 @@
 	import type { RedditPost } from '$lib/types/reddit'
 	import Image from './Image.svelte'
 
-	export let post: RedditPost
-	export let showSub = false
-	export let showUsername = false
+	let {
+		post,
+		showSub = false,
+		showUsername = false,
+		onclick,
+	}: {
+		post: RedditPost
+		showSub?: boolean
+		showUsername?: boolean
+		onclick?: () => void
+	} = $props()
 
-	let showEmbed = false
-	let showCaption = false
+	let showEmbed = $state(false)
+	let showCaption = $state(false)
 	const setShowCaption = () => (showCaption = true)
 </script>
 
@@ -25,8 +33,8 @@
 			<Image
 				src={post.thumbnail}
 				alt={post.title}
-				on:loaded={setShowCaption}
-				on:click={() => (showEmbed = true)}
+				onloaded={setShowCaption}
+				onclick={() => (showEmbed = true)}
 			/>
 		{/if}
 	{:else if post.type === 'image'}
@@ -37,12 +45,12 @@
 			height={dimensions.height}
 			alt={post.title}
 			thumbnail={post.thumbnail}
-			on:loaded={setShowCaption}
-			on:click
+			onloaded={setShowCaption}
+			{onclick}
 		/>
 	{:else if post.type === 'gallery'}
 		<div class="gallery-container">
-			<Image src={getGalleryImageUrl(post)} alt={post.title} on:loaded={setShowCaption} on:click />
+			<Image src={getGalleryImageUrl(post)} alt={post.title} onloaded={setShowCaption} {onclick} />
 			<div class="gallery-indicator">📷</div>
 		</div>
 	{/if}

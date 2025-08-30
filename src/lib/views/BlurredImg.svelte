@@ -1,14 +1,25 @@
 <script lang="ts">
-	export let src: string
-	export let width: number | undefined
-	export let height: number | undefined
-	export let blur = true
+	let {
+		src,
+		width,
+		height,
+		blur = true,
+		onclick,
+	}: {
+		src: string
+		width: number | undefined
+		height: number | undefined
+		blur?: boolean
+		onclick?: () => void
+	} = $props()
 
-	$: aspectRatio = width && height ? width / height : undefined
+	const aspectRatio = $derived(width && height ? width / height : undefined)
 </script>
 
-<!-- svelte-ignore a11y-missing-attribute -->
-<img {src} style:aspect-ratio={aspectRatio} class:blur />
+<!-- svelte-ignore a11y_missing_attribute -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<img {src} style:aspect-ratio={aspectRatio} class:blur {onclick} />
 
 <style>
 	img {

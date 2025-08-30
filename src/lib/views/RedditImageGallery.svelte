@@ -5,23 +5,43 @@
 	import Image from './Image.svelte'
 	import Post from './Post.svelte'
 
-	export let posts: RedditPost[]
-	export let title: string
-	export let url: string
-	export let showSub = false
-	export let showUsername = true
-	export let initialAfter: string | undefined = undefined
-	export let initialHasMore = false
-	export let loadMoreUrl: string
+	let {
+		posts,
+		title,
+		url,
+		showSub = false,
+		showUsername = true,
+		initialAfter = undefined,
+		initialHasMore = false,
+		loadMoreUrl,
+	}: {
+		posts: RedditPost[]
+		title: string
+		url: string
+		showSub?: boolean
+		showUsername?: boolean
+		initialAfter?: string | undefined
+		initialHasMore?: boolean
+		loadMoreUrl: string
+	} = $props()
+
+	let fullScreenPost = $state<RedditPost | null>(null)
+	let allPosts = $state(posts)
+	let nextAfter = $state(initialAfter)
+	let hasMore = $state(initialHasMore)
+	let isLoading = $state(false)
 
 	const imgPostFilter = (post: RedditPost) => {
 		return hasMediaContent(post)
 	}
 
-	$: filteredPosts = allPosts.filter(imgPostFilter)
+	const filteredPosts = $derived(allPosts.filter(imgPostFilter))
 
-	$: console.log(`Displaying ${filteredPosts.length} media items out of ${allPosts.length}.`)
-	$: {
+	$effect(() => {
+		console.log(`Displaying ${filteredPosts.length} media items out of ${allPosts.length}.`)
+	})
+
+	$effect(() => {
 		const typeCounts = allPosts.reduce(
 			(acc, post) => {
 				acc[post.type] = (acc[post.type] || 0) + 1
@@ -30,7 +50,7 @@
 			{} as Record<string, number>
 		)
 		console.table(typeCounts)
-	}
+	})
 
 	const loadMore = async () => {
 		if (isLoading || !hasMore || !nextAfter) return
@@ -69,13 +89,9 @@
 		fullScreenPost = null
 	}
 
-	let fullScreenPost: RedditPost | null
-	let allPosts = posts
-	let nextAfter = initialAfter
-	let hasMore = initialHasMore
-	let isLoading = false
-
-	$: fixateScrolling(!!fullScreenPost)
+	$effect(() => {
+		fixateScrolling(!!fullScreenPost)
+	})
 
 	function fixateScrolling(modalVisible: boolean) {
 		if (typeof window !== 'undefined') {
@@ -113,14 +129,14 @@
 <section>
 	{#each filteredPosts as post (post.id)}
 		<div class="post">
-			<Post {post} {showSub} {showUsername} on:click={() => onPostClick(post)} />
+			<Post {post} {showSub} {showUsername} onclick={() => onPostClick(post)} />
 		</div>
 	{/each}
 </section>
 
 {#if hasMore}
 	<div class="load-more-container">
-		<button class="load-more-btn" on:click={loadMore} disabled={isLoading}>
+		<button class="load-more-btn" onclick={loadMore} disabled={isLoading}>
 			{#if isLoading}
 				Loading...
 			{:else}
@@ -130,15 +146,15 @@
 	</div>
 {/if}
 
-<svelte:window on:keydown={onKeydown} />
+<svelte:window onkeydown={onKeydown} />
 
 {#if fullScreenPost}
 	<div
 		class="backdrop"
-		on:click={() => onModalHide()}
+		onclick={() => onModalHide()}
 		role="button"
 		tabindex="0"
-		on:keydown={(e) => e.key === 'Enter' && onModalHide()}
+		onkeydown={(e) => e.key === 'Enter' && onModalHide()}
 	>
 		<div class="modal-content">
 			{#if fullScreenPost.type === 'image'}

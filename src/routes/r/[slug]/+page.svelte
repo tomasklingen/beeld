@@ -1,10 +1,10 @@
 <script lang="ts">
-	export let data: PageData
-
 	import RedditImageGallery from '$lib/views/RedditImageGallery.svelte'
 	import type { PageData } from './$types'
 
-	$: isMulti = data.sub.includes('+')
+	let { data }: { data: PageData } = $props()
+
+	const isMulti = $derived(data.sub.includes('+'))
 </script>
 
 <RedditImageGallery

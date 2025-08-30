@@ -1,8 +1,8 @@
 <script lang="ts">
-	export let data: PageData
-
 	import RedditImageGallery from '$lib/views/RedditImageGallery.svelte'
 	import type { PageData } from './$types'
+
+	let { data }: { data: PageData } = $props()
 </script>
 
 <RedditImageGallery
