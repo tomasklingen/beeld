@@ -1,4 +1,4 @@
-import type { RedditPost } from './types/reddit'
+import type { LegacyRedditPost, RedditPost } from './types/reddit'
 
 type ListPeriod = 'hour' | 'day' | 'week' | 'month' | 'year' | 'all'
 type ListSorting = 'hot' | 'top' | 'new' | 'rising' | 'best'
@@ -18,6 +18,67 @@ type RedditResponse =
 	| {
 			error: Error
 	  }
+
+// Parser function to convert raw Reddit API data to our ADT
+function parseRedditPost(rawPost: LegacyRedditPost): RedditPost {
+	const basePost = {
+		author: rawPost.author,
+		domain: rawPost.domain,
+		id: rawPost.id,
+		name: rawPost.name,
+		permalink: rawPost.permalink,
+		subreddit: rawPost.subreddit,
+		thumbnail: rawPost.thumbnail,
+		title: rawPost.title,
+		url: rawPost.url,
+	}
+
+	// Determine post type based on properties
+	if (rawPost.post_hint === 'rich:video' && rawPost.secure_media_embed?.media_domain_url) {
+		return {
+			...basePost,
+			type: 'embed',
+			post_hint: 'rich:video',
+			secure_media_embed: rawPost.secure_media_embed,
+		}
+	}
+
+
+	if (rawPost.post_hint === 'image' && rawPost.preview?.images) {
+		return {
+			...basePost,
+			type: 'image',
+			post_hint: 'image',
+			preview: {
+				images: rawPost.preview.images,
+			},
+		}
+	}
+
+	if (rawPost.is_gallery) {
+		return {
+			...basePost,
+			type: 'gallery',
+			is_gallery: true,
+			preview: rawPost.preview,
+		}
+	}
+
+	// Check if it's a self post (text post)
+	if (rawPost.domain === `self.${rawPost.subreddit}` || rawPost.url?.includes(`/r/${rawPost.subreddit}/comments/`)) {
+		return {
+			...basePost,
+			type: 'text',
+		}
+	}
+
+	// Default to link post
+	return {
+		...basePost,
+		type: 'link',
+		url: rawPost.url,
+	}
+}
 
 export function createRedditService(fetchImpl: typeof fetch = fetch) {
 	async function getListing(r: RedditRequest): Promise<RedditResponse> {
@@ -46,10 +107,10 @@ export function createRedditService(fetchImpl: typeof fetch = fetch) {
 				}
 			}
 			const respData = await r.json()
-			const c: { data: RedditPost }[] = respData.data.children
+			const c: { data: LegacyRedditPost }[] = respData.data.children
 			return {
 				error: null,
-				posts: c.map((c) => c.data),
+				posts: c.map((c) => parseRedditPost(c.data)),
 			}
 		} catch (e) {
 			console.error(e)
@@ -64,17 +125,11 @@ export function createRedditService(fetchImpl: typeof fetch = fetch) {
 	}
 }
 
-export const hasEmbed = (p: RedditPost) => p.post_hint === 'rich:video'
-export const isGifv = (p: RedditPost) => {
-	return (p.url as string).endsWith('gifv')
-}
-export const isNormalImage = (p: RedditPost) => p.post_hint === 'image'
-export const getImageDimensions = (p: RedditPost) => p.preview.images?.[0].source
-
-export const mp4Link = (link: string) => {
-	const newlink = link.replace('gifv', 'mp4')
-	return newlink
-}
+// Legacy utility functions - updated to work with ADT
+export const hasEmbed = (p: RedditPost) => p.type === 'embed'
+export const isNormalImage = (p: RedditPost) => p.type === 'image'
+export const getImageDimensions = (p: RedditPost) =>
+	p.type === 'image' ? p.preview.images[0].source : undefined
 
 export const authorUrl = (p: RedditPost) => {
 	return `/u/${p.author}`
