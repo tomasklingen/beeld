@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { hasEmbed, isGifv, isNormalImage } from '$lib/RedditService'
+	import type { RedditPost } from '$lib/types/reddit'
+	import { hasMediaContent } from '$lib/types/reddit'
 	import Image from './Image.svelte'
+	import Post from './Post.svelte'
 
 	export let posts: RedditPost[]
 	export let title: string
@@ -8,18 +10,26 @@
 	export let showSub = false
 	export let showUsername = true
 
-	import type { RedditPost } from '$lib/types/reddit'
-	import Post from './Post.svelte'
-
 	const imgPostFilter = (post: RedditPost) => {
-		return hasEmbed(post) || isGifv(post) || isNormalImage(post)
+		return hasMediaContent(post)
 	}
 
 	$: filteredPosts = posts.filter(imgPostFilter)
 
-	$: console.log(`Displaying ${filteredPosts.length} media items.`)
+	$: console.log(`Displaying ${filteredPosts.length} media items out of ${posts.length}.`)
+	$: {
+		const typeCounts = posts.reduce(
+			(acc, post) => {
+				acc[post.type] = (acc[post.type] || 0) + 1
+				return acc
+			},
+			{} as Record<string, number>
+		)
+		console.table(typeCounts)
+	}
 
 	const onPostClick = (post: RedditPost) => {
+		console.log(post)
 		fullScreenPost = post
 	}
 	const onModalHide = () => {
@@ -51,10 +61,13 @@
 	}
 
 	const nextImage = (offset = 1) => {
-		if (fullScreenPost) {
-			const imgPosts = filteredPosts.filter(isNormalImage)
+		if (fullScreenPost && fullScreenPost.type === 'image') {
+			const imgPosts = filteredPosts.filter((post) => post.type === 'image')
 			const currentIndex = imgPosts.indexOf(fullScreenPost)
-			fullScreenPost = imgPosts.at((currentIndex + offset) % imgPosts.length) as RedditPost
+			const nextPost = imgPosts.at((currentIndex + offset) % imgPosts.length)
+			if (nextPost) {
+				fullScreenPost = nextPost
+			}
 		}
 	}
 </script>
@@ -71,10 +84,19 @@
 <svelte:window on:keydown={onKeydown} />
 
 {#if fullScreenPost}
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<div class="backdrop" on:click={() => onModalHide()}>
+	<div
+		class="backdrop"
+		on:click={() => onModalHide()}
+		role="button"
+		tabindex="0"
+		on:keydown={(e) => e.key === 'Enter' && onModalHide()}
+	>
 		<div class="modal-content">
-			<Image src={fullScreenPost.url} alt={fullScreenPost.title} />
+			{#if fullScreenPost.type === 'image'}
+				<Image src={fullScreenPost.url} alt={fullScreenPost.title} />
+			{:else}
+				<Image src={fullScreenPost.thumbnail} alt={fullScreenPost.title} />
+			{/if}
 		</div>
 	</div>
 {/if}

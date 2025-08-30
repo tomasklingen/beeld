@@ -1,26 +1,11 @@
 <script lang="ts">
-	import {
-		authorUrl,
-		getImageDimensions,
-		hasEmbed,
-		isGifv,
-		isNormalImage,
-		mp4Link,
-		postUrl,
-	} from '$lib/RedditService'
+	import { authorUrl, postUrl } from '$lib/RedditService'
+	import type { RedditPost } from '$lib/types/reddit'
+	import Image from './Image.svelte'
 
 	export let post: RedditPost
 	export let showSub = false
 	export let showUsername = false
-
-	import type { RedditPost } from '$lib/types/reddit'
-
-	import Image from './Image.svelte'
-	import { getImageUrl } from '$lib/utils/imageProxy'
-
-	const onError = (post: RedditPost) => (e: Event) => {
-		console.error('failed to load post', post, e)
-	}
 
 	let showEmbed = false
 	let showCaption = false
@@ -28,14 +13,14 @@
 </script>
 
 <figure>
-	{#if hasEmbed(post)}
+	{#if post.type === 'embed'}
 		{#if showEmbed}
 			<iframe
 				allowfullscreen
 				class="embed"
 				src={post.secure_media_embed.media_domain_url}
 				title="embed"
-			/>
+			></iframe>
 		{:else}
 			<Image
 				src={post.thumbnail}
@@ -44,29 +29,19 @@
 				on:click={() => (showEmbed = true)}
 			/>
 		{/if}
-	{:else if isGifv(post)}
-		<video
-			preload="metadata"
-			controls
-			muted
-			loop
-			on:canplay={setShowCaption}
-			on:error={onError(post)}
-		>
-			<source src={getImageUrl(mp4Link(post.url))} type="video/mp4" />
-			<track kind="captions" />
-		</video>
-	{:else if isNormalImage(post)}
-		{@const dimensions = getImageDimensions(post)}
+	{:else if post.type === 'image'}
+		{@const dimensions = post.preview.images[0].source}
 		<Image
 			src={post.url}
-			width={dimensions?.width}
-			height={dimensions?.height}
+			width={dimensions.width}
+			height={dimensions.height}
 			alt={post.title}
 			thumbnail={post.thumbnail}
 			on:loaded={setShowCaption}
 			on:click
 		/>
+	{:else if post.type === 'gallery'}
+		<Image src={post.thumbnail} alt={post.title} on:loaded={setShowCaption} on:click />
 	{/if}
 
 	<figcaption style:visibility={showCaption ? 'visible' : 'hidden'}>
@@ -99,9 +74,5 @@
 
 	.title {
 		text-overflow: ellipsis;
-	}
-	video {
-		width: 100%;
-		max-height: inherit;
 	}
 </style>
