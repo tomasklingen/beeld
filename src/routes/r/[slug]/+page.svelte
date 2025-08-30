@@ -12,4 +12,7 @@
 	title={`r/${data.sub}`}
 	showSub={isMulti}
 	url={`https://reddit.com/r/${data.sub}`}
+	initialAfter={data.after}
+	initialHasMore={data.hasMore}
+	loadMoreUrl={`/api/reddit?subReddit=${encodeURIComponent(data.sub)}`}
 />

@@ -11,4 +11,7 @@
 	showSub={true}
 	showUsername={false}
 	url={`https://old.reddit.com/u/${data.username}`}
+	initialAfter={data.after}
+	initialHasMore={data.hasMore}
+	loadMoreUrl={`/api/reddit?username=${encodeURIComponent(data.username)}`}
 />

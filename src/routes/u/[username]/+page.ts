@@ -20,6 +20,8 @@ export async function load({ params, fetch }: PageLoadEvent) {
 		return {
 			posts: data.posts,
 			username,
+			after: data.after,
+			hasMore: data.hasMore,
 		}
 	} catch (err) {
 		console.error('Error loading user:', err)

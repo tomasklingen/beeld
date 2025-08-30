@@ -10,16 +10,19 @@
 	export let url: string
 	export let showSub = false
 	export let showUsername = true
+	export let initialAfter: string | undefined = undefined
+	export let initialHasMore = false
+	export let loadMoreUrl: string
 
 	const imgPostFilter = (post: RedditPost) => {
 		return hasMediaContent(post)
 	}
 
-	$: filteredPosts = posts.filter(imgPostFilter)
+	$: filteredPosts = allPosts.filter(imgPostFilter)
 
-	$: console.log(`Displaying ${filteredPosts.length} media items out of ${posts.length}.`)
+	$: console.log(`Displaying ${filteredPosts.length} media items out of ${allPosts.length}.`)
 	$: {
-		const typeCounts = posts.reduce(
+		const typeCounts = allPosts.reduce(
 			(acc, post) => {
 				acc[post.type] = (acc[post.type] || 0) + 1
 				return acc
@@ -27,6 +30,35 @@
 			{} as Record<string, number>
 		)
 		console.table(typeCounts)
+	}
+
+	const loadMore = async () => {
+		if (isLoading || !hasMore || !nextAfter) return
+
+		isLoading = true
+		try {
+			const params = new URLSearchParams({
+				after: nextAfter,
+				limit: '30',
+			})
+			const response = await fetch(`${loadMoreUrl}&${params}`)
+			if (!response.ok) {
+				throw new Error(`Failed to load more posts: ${response.statusText}`)
+			}
+
+			const data = await response.json()
+			if (data.error) {
+				throw new Error(data.error)
+			}
+
+			allPosts = [...allPosts, ...data.posts]
+			nextAfter = data.after
+			hasMore = data.hasMore
+		} catch (error) {
+			console.error('Error loading more posts:', error)
+		} finally {
+			isLoading = false
+		}
 	}
 
 	const onPostClick = (post: RedditPost) => {
@@ -38,6 +70,10 @@
 	}
 
 	let fullScreenPost: RedditPost | null
+	let allPosts = posts
+	let nextAfter = initialAfter
+	let hasMore = initialHasMore
+	let isLoading = false
 
 	$: fixateScrolling(!!fullScreenPost)
 
@@ -81,6 +117,18 @@
 		</div>
 	{/each}
 </section>
+
+{#if hasMore}
+	<div class="load-more-container">
+		<button class="load-more-btn" on:click={loadMore} disabled={isLoading}>
+			{#if isLoading}
+				Loading...
+			{:else}
+				Load More
+			{/if}
+		</button>
+	</div>
+{/if}
 
 <svelte:window on:keydown={onKeydown} />
 
@@ -137,5 +185,31 @@
 	section {
 		columns: 5 25em;
 		column-gap: 1rem;
+	}
+
+	.load-more-container {
+		display: flex;
+		justify-content: center;
+		margin: 2rem 0;
+	}
+
+	.load-more-btn {
+		padding: 0.75rem 2rem;
+		background: #1976d2;
+		color: white;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 1rem;
+		transition: background 0.2s;
+	}
+
+	.load-more-btn:hover:not(:disabled) {
+		background: #1565c0;
+	}
+
+	.load-more-btn:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 </style>

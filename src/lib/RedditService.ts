@@ -8,11 +8,14 @@ interface RedditRequest {
 	username?: string
 	subReddit?: string
 	t?: ListPeriod
+	after?: string
 }
 
 type RedditResponse =
 	| {
 			posts: RedditPost[]
+			after?: string
+			hasMore: boolean
 			error: null
 	  }
 	| {
@@ -94,7 +97,7 @@ function parseRedditPost(rawPost: LegacyRedditPost): RedditPost {
 
 export function createRedditService(fetchImpl: typeof fetch = fetch) {
 	async function getListing(r: RedditRequest): Promise<RedditResponse> {
-		const { sorting = 'top', limit = 30, username, subReddit, t = 'week' } = r
+		const { sorting = 'top', limit = 30, username, subReddit, t = 'week', after } = r
 
 		const listType = subReddit
 			? (`r/${subReddit}` as const)
@@ -106,7 +109,14 @@ export function createRedditService(fetchImpl: typeof fetch = fetch) {
 			throw Error(`need a username or subreddit`)
 		}
 
-		return makeRequest(`https://www.reddit.com/${listType}/${sorting}.json?limit=${limit}&t=${t}`)
+		const params = new URLSearchParams({
+			limit: limit.toString(),
+			t,
+		})
+		if (after) {
+			params.set('after', after)
+		}
+		return makeRequest(`https://www.reddit.com/${listType}/${sorting}.json?${params}`)
 	}
 
 	async function makeRequest(url: string): Promise<RedditResponse> {
@@ -123,6 +133,8 @@ export function createRedditService(fetchImpl: typeof fetch = fetch) {
 			return {
 				error: null,
 				posts: c.map((c) => parseRedditPost(c.data)),
+				after: respData.data.after,
+				hasMore: !!respData.data.after,
 			}
 		} catch (e) {
 			console.error(e)

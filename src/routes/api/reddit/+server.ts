@@ -10,6 +10,7 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 	const limit = parseInt(url.searchParams.get('limit') || '30')
 	const t =
 		(url.searchParams.get('t') as 'hour' | 'day' | 'week' | 'month' | 'year' | 'all') || 'week'
+	const after = url.searchParams.get('after')
 
 	if (!subReddit && !username) {
 		error(400, 'Either subReddit or username parameter is required')
@@ -23,6 +24,7 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 			sorting,
 			limit,
 			t,
+			after: after || undefined,
 		})
 
 		if (resp.error) {
@@ -32,6 +34,8 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 		return json(
 			{
 				posts: resp.posts,
+				after: resp.after,
+				hasMore: resp.hasMore,
 				error: null,
 			},
 			{

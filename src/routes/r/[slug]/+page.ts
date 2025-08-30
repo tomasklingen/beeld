@@ -20,6 +20,8 @@ export async function load({ params, fetch }: PageLoadEvent) {
 		return {
 			sub: slug,
 			posts: data.posts,
+			after: data.after,
+			hasMore: data.hasMore,
 		}
 	} catch (err) {
 		console.error('Error loading subreddit:', err)
