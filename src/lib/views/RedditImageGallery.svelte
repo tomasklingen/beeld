@@ -41,7 +41,7 @@
 		if (sectionElement) {
 			const containerWidth = sectionElement.offsetWidth
 			const minColumnWidth = 400 // 25em ≈ 400px
-			columnCount = Math.max(1, Math.floor(containerWidth / minColumnWidth))
+			columnCount = Math.max(1, Math.min(5, Math.floor(containerWidth / minColumnWidth)))
 		}
 	})
 
@@ -194,7 +194,7 @@
 			if (sectionElement) {
 				const containerWidth = sectionElement.offsetWidth
 				const minColumnWidth = 400
-				const newColumnCount = Math.max(1, Math.floor(containerWidth / minColumnWidth))
+				const newColumnCount = Math.max(1, Math.min(5, Math.floor(containerWidth / minColumnWidth)))
 				if (newColumnCount !== columnCount) {
 					columnCount = newColumnCount
 				}
