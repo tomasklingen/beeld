@@ -55,11 +55,21 @@ function parseRedditPost(rawPost: LegacyRedditPost): RedditPost {
 	}
 
 	if (rawPost.is_gallery) {
+		console.log('Gallery post detected:', {
+			id: rawPost.id,
+			has_media_metadata: !!rawPost.media_metadata,
+			has_gallery_data: !!rawPost.gallery_data,
+			gallery_items_count: rawPost.gallery_data?.items?.length || 0,
+			media_metadata_keys: rawPost.media_metadata ? Object.keys(rawPost.media_metadata) : [],
+		})
+
 		return {
 			...basePost,
 			type: 'gallery',
 			is_gallery: true,
 			preview: rawPost.preview,
+			media_metadata: rawPost.media_metadata,
+			gallery_data: rawPost.gallery_data,
 		}
 	}
 
@@ -138,3 +148,33 @@ export const authorUrl = (p: RedditPost) => {
 }
 
 export const postUrl = (p: RedditPost) => `https://old.reddit.com${p.permalink}`
+
+export const getGalleryImageUrl = (post: RedditPost): string => {
+	if (post.type !== 'gallery') return post.thumbnail
+
+	if (!post.media_metadata || !post.gallery_data?.items?.length) {
+		console.log(`Gallery ${post.id}: No metadata or gallery data, using thumbnail`)
+		return post.thumbnail
+	}
+
+	const firstImageId = post.gallery_data.items[0]?.media_id
+	if (!firstImageId) {
+		console.log(`Gallery ${post.id}: No media_id found, using thumbnail`)
+		return post.thumbnail
+	}
+
+	const imageData = post.media_metadata[firstImageId]
+	if (!imageData?.s?.u) {
+		console.log(`Gallery ${post.id}: No image URL found for ${firstImageId}, using thumbnail`)
+		return post.thumbnail
+	}
+
+	const decodedUrl = imageData.s.u.replace(/amp;/g, '')
+	console.log(`Gallery ${post.id}: Using HQ image:`, {
+		original_url: imageData.s.u,
+		decoded_url: decodedUrl,
+		dimensions: `${imageData.s.x}x${imageData.s.y}`,
+	})
+
+	return decodedUrl
+}

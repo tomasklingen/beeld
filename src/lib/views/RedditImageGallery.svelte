@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { RedditPost } from '$lib/types/reddit'
 	import { hasMediaContent } from '$lib/types/reddit'
+	import { getGalleryImageUrl } from '$lib/RedditService'
 	import Image from './Image.svelte'
 	import Post from './Post.svelte'
 
@@ -94,6 +95,8 @@
 		<div class="modal-content">
 			{#if fullScreenPost.type === 'image'}
 				<Image src={fullScreenPost.url} alt={fullScreenPost.title} />
+			{:else if fullScreenPost.type === 'gallery'}
+				<Image src={getGalleryImageUrl(fullScreenPost)} alt={fullScreenPost.title} />
 			{:else}
 				<Image src={fullScreenPost.thumbnail} alt={fullScreenPost.title} />
 			{/if}

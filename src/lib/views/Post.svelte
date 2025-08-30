@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authorUrl, postUrl } from '$lib/RedditService'
+	import { authorUrl, postUrl, getGalleryImageUrl } from '$lib/RedditService'
 	import type { RedditPost } from '$lib/types/reddit'
 	import Image from './Image.svelte'
 
@@ -41,7 +41,10 @@
 			on:click
 		/>
 	{:else if post.type === 'gallery'}
-		<Image src={post.thumbnail} alt={post.title} on:loaded={setShowCaption} on:click />
+		<div class="gallery-container">
+			<Image src={getGalleryImageUrl(post)} alt={post.title} on:loaded={setShowCaption} on:click />
+			<div class="gallery-indicator">📷</div>
+		</div>
 	{/if}
 
 	<figcaption style:visibility={showCaption ? 'visible' : 'hidden'}>
@@ -74,5 +77,23 @@
 
 	.title {
 		text-overflow: ellipsis;
+	}
+
+	.gallery-container {
+		position: relative;
+		width: 100%;
+		height: 100%;
+	}
+
+	.gallery-indicator {
+		position: absolute;
+		bottom: 8px;
+		right: 8px;
+		background: rgba(0, 0, 0, 0.7);
+		color: white;
+		padding: 4px 6px;
+		border-radius: 4px;
+		font-size: 0.8em;
+		pointer-events: none;
 	}
 </style>

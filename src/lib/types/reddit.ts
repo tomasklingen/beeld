@@ -40,6 +40,20 @@ export interface GalleryPost extends BaseRedditPost {
 			},
 		]
 	}
+	media_metadata?: Record<
+		string,
+		{
+			status: string
+			e: string
+			m: string
+			p?: Array<{ y: number; x: number; u: string }>
+			s: { y: number; x: number; u: string }
+			id: string
+		}
+	>
+	gallery_data?: {
+		items: Array<{ media_id: string; id: number }>
+	}
 }
 
 export interface TextPost extends BaseRedditPost {
@@ -91,4 +105,18 @@ export interface LegacyRedditPost {
 	thumbnail: string
 	title: string
 	url: string
+	media_metadata?: Record<
+		string,
+		{
+			status: string
+			e: string
+			m: string
+			p?: Array<{ y: number; x: number; u: string }>
+			s: { y: number; x: number; u: string }
+			id: string
+		}
+	>
+	gallery_data?: {
+		items: Array<{ media_id: string; id: number }>
+	}
 }
