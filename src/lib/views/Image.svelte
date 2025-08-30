@@ -32,6 +32,7 @@
 	// Use proxy for Reddit images to avoid CORS issues
 	const proxiedSrc = $derived(getImageUrl(src))
 	const proxiedThumbnail = $derived(thumbnail ? getImageUrl(thumbnail) : undefined)
+	const aspectRatio = $derived(width && height ? width / height : undefined)
 
 	const handleLoad = () => {
 		loaded = true
@@ -109,6 +110,7 @@
 			bind:this={thisImg}
 			class:loaded
 			class:absolute={proxiedThumbnail}
+			style:aspect-ratio={aspectRatio}
 			{onclick}
 		/>
 	{/if}

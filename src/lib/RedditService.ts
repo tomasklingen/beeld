@@ -165,28 +165,20 @@ export const getGalleryImageUrl = (post: RedditPost): string => {
 	if (post.type !== 'gallery') return post.thumbnail
 
 	if (!post.media_metadata || !post.gallery_data?.items?.length) {
-		console.log(`Gallery ${post.id}: No metadata or gallery data, using thumbnail`)
 		return post.thumbnail
 	}
 
 	const firstImageId = post.gallery_data.items[0]?.media_id
 	if (!firstImageId) {
-		console.log(`Gallery ${post.id}: No media_id found, using thumbnail`)
 		return post.thumbnail
 	}
 
 	const imageData = post.media_metadata[firstImageId]
 	if (!imageData?.s?.u) {
-		console.log(`Gallery ${post.id}: No image URL found for ${firstImageId}, using thumbnail`)
 		return post.thumbnail
 	}
 
 	const decodedUrl = imageData.s.u.replace(/amp;/g, '')
-	console.log(`Gallery ${post.id}: Using HQ image:`, {
-		original_url: imageData.s.u,
-		decoded_url: decodedUrl,
-		dimensions: `${imageData.s.x}x${imageData.s.y}`,
-	})
 
 	return decodedUrl
 }

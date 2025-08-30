@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { getGalleryImageUrl } from '$lib/RedditService'
 	import type { RedditPost } from '$lib/types/reddit'
 	import { hasMediaContent } from '$lib/types/reddit'
-	import { getGalleryImageUrl } from '$lib/RedditService'
 	import Image from './Image.svelte'
 	import Post from './Post.svelte'
 
@@ -30,6 +30,42 @@
 	let nextAfter = $state(initialAfter)
 	let hasMore = $state(initialHasMore)
 	let isLoading = $state(false)
+
+	let sectionElement = $state<HTMLElement>()
+	let columnCount = $state(5)
+	let columns = $state<RedditPost[][]>([])
+	let resizeTimeout = 0
+
+	// Update column count on mount
+	$effect(() => {
+		if (sectionElement) {
+			const containerWidth = sectionElement.offsetWidth
+			const minColumnWidth = 400 // 25em ≈ 400px
+			columnCount = Math.max(1, Math.floor(containerWidth / minColumnWidth))
+		}
+	})
+
+	// Distribute posts into columns using height-based placement
+	$effect(() => {
+		const newColumns = Array.from({ length: columnCount }, () => [] as RedditPost[])
+		const columnHeights = Array.from({ length: columnCount }, () => 0)
+
+		filteredPosts.forEach((post) => {
+			// Use image dimensions for height estimation
+			let estimatedHeight = 300
+			if (post.type === 'image' && post.preview?.images?.[0]?.source) {
+				const { width, height } = post.preview.images[0].source
+				estimatedHeight = (height / width) * 400 + 100 // Add margin for caption
+			}
+
+			// Find column with shortest estimated height
+			const shortestIndex = columnHeights.indexOf(Math.min(...columnHeights))
+			newColumns[shortestIndex].push(post)
+			columnHeights[shortestIndex] += estimatedHeight
+		})
+
+		columns = newColumns
+	})
 
 	const imgPostFilter = (post: RedditPost) => {
 		return hasMediaContent(post)
@@ -126,10 +162,14 @@
 </script>
 
 <h1><a href={url}>{title}</a></h1>
-<section>
-	{#each filteredPosts as post (post.id)}
-		<div class="post">
-			<Post {post} {showSub} {showUsername} onclick={() => onPostClick(post)} />
+<section bind:this={sectionElement}>
+	{#each columns as column}
+		<div class="column">
+			{#each column as post (post.id)}
+				<div class="post">
+					<Post {post} {showSub} {showUsername} onclick={() => onPostClick(post)} />
+				</div>
+			{/each}
 		</div>
 	{/each}
 </section>
@@ -146,7 +186,22 @@
 	</div>
 {/if}
 
-<svelte:window onkeydown={onKeydown} />
+<svelte:window
+	onkeydown={onKeydown}
+	onresize={() => {
+		clearTimeout(resizeTimeout)
+		resizeTimeout = setTimeout(() => {
+			if (sectionElement) {
+				const containerWidth = sectionElement.offsetWidth
+				const minColumnWidth = 400
+				const newColumnCount = Math.max(1, Math.floor(containerWidth / minColumnWidth))
+				if (newColumnCount !== columnCount) {
+					columnCount = newColumnCount
+				}
+			}
+		}, 50)
+	}}
+/>
 
 {#if fullScreenPost}
 	<div
@@ -199,8 +254,14 @@
 	}
 
 	section {
-		columns: 5 25em;
-		column-gap: 1rem;
+		display: flex;
+		gap: 1rem;
+		align-items: flex-start;
+	}
+
+	.column {
+		flex: 1;
+		min-width: 25em;
 	}
 
 	.load-more-container {
