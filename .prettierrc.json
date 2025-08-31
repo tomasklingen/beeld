@@ -1,0 +1,16 @@
+{
+	"plugins": ["@prettier/plugin-oxc", "prettier-plugin-svelte"],
+	"useTabs": true,
+	"semi": false,
+	"singleQuote": true,
+	"trailingComma": "es5",
+	"printWidth": 100,
+	"overrides": [
+		{
+			"files": "*.svelte",
+			"options": {
+				"parser": "svelte"
+			}
+		}
+	]
+}

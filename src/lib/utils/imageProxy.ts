@@ -23,6 +23,7 @@ export function getProxiedImageUrl(originalUrl: string): string {
 
 	try {
 		// Validate URL format
+		// oxlint-disable-next-line no-new
 		new URL(originalUrl)
 		const encodedUrl = encodeURIComponent(originalUrl)
 		return `/api/image?url=${encodedUrl}`
@@ -54,6 +55,7 @@ export function getImageUrl(url: string): string {
 
 	// Check if it's a valid URL
 	try {
+		// oxlint-disable-next-line
 		new URL(url)
 	} catch {
 		console.warn('getImageUrl called with invalid URL format:', url)
