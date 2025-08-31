@@ -309,7 +309,7 @@
 				<Image src={fullScreenPost.thumbnail} alt={fullScreenPost.title} />
 			{/if}
 		</div>
-		
+
 		<PostDescription
 			post={fullScreenPost}
 			showSub={true}
@@ -343,8 +343,8 @@
 		justify-content: center;
 	}
 	.modal-content {
-		height: 90%;
-		max-width: 90%;
+		height: 95%;
+		max-width: 95%;
 		display: flex;
 		align-items: center;
 	}
@@ -400,6 +400,7 @@
 		align-items: center;
 		justify-content: center;
 		height: 100%;
+		width: 100%;
 	}
 
 	.gallery-main :global(.image-container),
@@ -415,25 +416,38 @@
 		position: absolute;
 		top: 50%;
 		transform: translateY(-50%);
-		width: 80px;
-		height: 120px;
-		opacity: 0.3;
+		width: 110px;
+		height: 160px;
+		opacity: 0.7;
 		overflow: hidden;
 		border-radius: 8px;
 		pointer-events: none;
 		transition: opacity 0.2s ease;
+		background: rgba(0, 0, 0, 0.5);
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		z-index: 10;
 	}
 
 	.gallery-preview-left {
-		left: 10px;
+		left: -130px; /* Position outside the main image area */
 	}
 
 	.gallery-preview-right {
-		right: 10px;
+		right: -130px; /* Position outside the main image area */
 	}
 
-	.gallery-container:hover .gallery-preview {
-		opacity: 0.6;
+	/* Hide previews on smaller screens */
+	@media (max-width: 768px) {
+		.gallery-preview {
+			display: none;
+		}
+	}
+
+	.gallery-preview :global(.image-container),
+	.gallery-preview :global(img) {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
 	}
 
 	.gallery-indicator {
@@ -448,5 +462,4 @@
 		font-size: 14px;
 		backdrop-filter: blur(10px);
 	}
-
 </style>
