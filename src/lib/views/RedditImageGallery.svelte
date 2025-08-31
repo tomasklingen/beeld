@@ -4,6 +4,7 @@
 	import { hasMediaContent } from '$lib/types/reddit'
 	import Image from './Image.svelte'
 	import Post from './Post.svelte'
+	import PostDescription from './PostDescription.svelte'
 
 	let {
 		posts,
@@ -308,6 +309,13 @@
 				<Image src={fullScreenPost.thumbnail} alt={fullScreenPost.title} />
 			{/if}
 		</div>
+		
+		<PostDescription
+			post={fullScreenPost}
+			showSub={true}
+			showUsername={true}
+			variant="fullscreen"
+		/>
 	</div>
 {/if}
 
@@ -440,4 +448,5 @@
 		font-size: 14px;
 		backdrop-filter: blur(10px);
 	}
+
 </style>

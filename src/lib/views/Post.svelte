@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { authorUrl, postUrl, getGalleryImageUrl } from '$lib/RedditService'
+	import { getGalleryImageUrl } from '$lib/RedditService'
 	import type { RedditPost } from '$lib/types/reddit'
 	import Image from './Image.svelte'
+	import PostDescription from './PostDescription.svelte'
 
 	let {
 		post,
@@ -56,16 +57,7 @@
 	{/if}
 
 	<figcaption style:visibility={showCaption ? 'visible' : 'hidden'}>
-		{#if showSub}
-			<a href={`/r/${post.subreddit}`}>r/{post.subreddit}</a>
-			•
-		{/if}
-		{#if showUsername}
-			<a href={authorUrl(post)}>u/{post.author}</a> •
-		{/if}
-		<a class="title" href={postUrl(post)} target="_blank" rel="noreferrer">
-			{post.title}
-		</a>
+		<PostDescription {post} {showSub} {showUsername} />
 	</figcaption>
 </figure>
 
@@ -75,16 +67,9 @@
 		height: 100%;
 		width: 100%;
 	}
-	figcaption {
-		font-size: 0.7em;
-	}
 	.embed {
 		width: 100%;
 		height: 30em;
-	}
-
-	.title {
-		text-overflow: ellipsis;
 	}
 
 	.gallery-container {
