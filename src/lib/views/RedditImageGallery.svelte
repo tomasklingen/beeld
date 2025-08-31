@@ -188,15 +188,15 @@
 				fullScreenPost = null
 				break
 			case 'ArrowRight':
-				nextImage()
+				navigateGallery()
 				break
 			case 'ArrowLeft':
-				nextImage(-1)
+				navigateGallery(-1)
 				break
 		}
 	}
 
-	const nextImage = (offset = 1) => {
+	const navigateGallery = (offset = 1) => {
 		if (!fullScreenPost) return
 
 		if (fullScreenPost.type === 'gallery') {
@@ -265,7 +265,14 @@
 {#if fullScreenPost}
 	<div
 		class="backdrop"
-		onclick={(event) => (event.target as HTMLElement).tagName !== 'IMG' && onModalHide()}
+		onclick={(event) => {
+			const target = event.target as HTMLElement
+			// Don't dismiss if clicking on images or gallery preview elements
+			if (target.tagName === 'IMG' || target.closest('.gallery-preview')) {
+				return
+			}
+			onModalHide()
+		}}
 		role="button"
 		tabindex="0"
 		onkeydown={(e) => e.key === 'Enter' && onModalHide()}
@@ -280,7 +287,21 @@
 				{@const images = getGalleryImages(fullScreenPost)}
 				<div class="gallery-container">
 					{#if prevImage}
-						<div class="gallery-preview gallery-preview-left">
+						<div
+							class="gallery-preview gallery-preview-left"
+							onclick={(e) => {
+								e.stopPropagation()
+								navigateGallery(-1)
+							}}
+							role="button"
+							tabindex="0"
+							onkeydown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									e.stopPropagation()
+									navigateGallery(-1)
+								}
+							}}
+						>
 							<Image src={prevImage.url} alt="Previous" />
 						</div>
 					{/if}
@@ -294,7 +315,21 @@
 					</div>
 
 					{#if nextImage}
-						<div class="gallery-preview gallery-preview-right">
+						<div
+							class="gallery-preview gallery-preview-right"
+							onclick={(e) => {
+								e.stopPropagation()
+								navigateGallery(1)
+							}}
+							role="button"
+							tabindex="0"
+							onkeydown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									e.stopPropagation()
+									navigateGallery(1)
+								}
+							}}
+						>
 							<Image src={nextImage.url} alt="Next" />
 						</div>
 					{/if}
@@ -421,11 +456,15 @@
 		opacity: 0.7;
 		overflow: hidden;
 		border-radius: 8px;
-		pointer-events: none;
+		pointer-events: auto;
+		cursor: pointer;
 		transition: opacity 0.2s ease;
 		background: rgba(0, 0, 0, 0.5);
-		border: 2px solid rgba(255, 255, 255, 0.3);
 		z-index: 10;
+	}
+
+	.gallery-preview:hover {
+		opacity: 0.9;
 	}
 
 	.gallery-preview-left {
