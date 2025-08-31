@@ -32,6 +32,13 @@
 	let hasMore = $state(initialHasMore)
 	let isLoading = $state(false)
 
+	// Sync allPosts with posts prop when navigating to new subreddit
+	$effect(() => {
+		allPosts = posts
+		nextAfter = initialAfter
+		hasMore = initialHasMore
+	})
+
 	let sectionElement = $state<HTMLElement>()
 	let columnCount = $state(5)
 	let columns = $state<RedditPost[][]>([])
