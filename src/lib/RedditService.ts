@@ -22,6 +22,19 @@ type RedditResponse =
 			error: Error
 	  }
 
+interface CacheEntry {
+	data: RedditResponse
+	timestamp: number
+	ttl: number
+}
+
+interface Cache {
+	get(key: string): CacheEntry | undefined
+	set(key: string, data: RedditResponse, ttl?: number): void
+	has(key: string): boolean
+	isExpired(entry: CacheEntry): boolean
+}
+
 // Parser function to convert raw Reddit API data to our ADT
 function parseRedditPost(rawPost: LegacyRedditPost): RedditPost {
 	const basePost = {
@@ -58,14 +71,6 @@ function parseRedditPost(rawPost: LegacyRedditPost): RedditPost {
 	}
 
 	if (rawPost.is_gallery) {
-		console.log('Gallery post detected:', {
-			id: rawPost.id,
-			has_media_metadata: !!rawPost.media_metadata,
-			has_gallery_data: !!rawPost.gallery_data,
-			gallery_items_count: rawPost.gallery_data?.items?.length || 0,
-			media_metadata_keys: rawPost.media_metadata ? Object.keys(rawPost.media_metadata) : [],
-		})
-
 		return {
 			...basePost,
 			type: 'gallery',
@@ -95,7 +100,41 @@ function parseRedditPost(rawPost: LegacyRedditPost): RedditPost {
 	}
 }
 
+function createCache(): Cache {
+	const cache = new Map<string, CacheEntry>()
+	const DEFAULT_TTL = 60 * 1000 // 1 minute in milliseconds
+
+	return {
+		get(key: string): CacheEntry | undefined {
+			const entry = cache.get(key)
+			if (entry && this.isExpired(entry)) {
+				cache.delete(key)
+				return undefined
+			}
+			return entry
+		},
+
+		set(key: string, data: RedditResponse, ttl: number = DEFAULT_TTL): void {
+			cache.set(key, {
+				data,
+				timestamp: Date.now(),
+				ttl,
+			})
+		},
+
+		has(key: string): boolean {
+			const entry = cache.get(key)
+			return entry !== undefined && !this.isExpired(entry)
+		},
+
+		isExpired(entry: CacheEntry): boolean {
+			return Date.now() - entry.timestamp > entry.ttl
+		},
+	}
+}
+
 export function createRedditService(fetchImpl: typeof fetch = fetch) {
+	const cache = createCache()
 	async function getListing(r: RedditRequest): Promise<RedditResponse> {
 		const { sorting = 'top', limit = 30, username, subReddit, t = 'week', after } = r
 
@@ -116,10 +155,18 @@ export function createRedditService(fetchImpl: typeof fetch = fetch) {
 		if (after) {
 			params.set('after', after)
 		}
-		return makeRequest(`https://www.reddit.com/${listType}/${sorting}.json?${params}`)
+		const redditUrl = `https://www.reddit.com/${listType}/${sorting}.json?${params}`
+		console.log('Reddit API call:', { listType, sorting, t, limit, after, redditUrl })
+		return makeRequest(redditUrl)
 	}
 
 	async function makeRequest(url: string): Promise<RedditResponse> {
+		const cachedEntry = cache.get(url)
+		if (cachedEntry) {
+			console.log(`Cache hit for: ${url}`)
+			return cachedEntry.data
+		}
+
 		try {
 			console.log(`Fetching: ${url}`)
 			const r = await fetchImpl(url)
@@ -130,12 +177,15 @@ export function createRedditService(fetchImpl: typeof fetch = fetch) {
 			}
 			const respData = await r.json()
 			const c: { data: LegacyRedditPost }[] = respData.data.children
-			return {
+			const response: RedditResponse = {
 				error: null,
 				posts: c.map((c) => parseRedditPost(c.data)),
 				after: respData.data.after,
 				hasMore: !!respData.data.after,
 			}
+
+			cache.set(url, response)
+			return response
 		} catch (e) {
 			console.error(e)
 			return {
