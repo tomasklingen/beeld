@@ -1,6 +1,19 @@
-<script>
+<script lang="ts">
 	import { page } from '$app/stores'
 	import github from '$lib/images/github.svg'
+	import { removeVisitedSub, visitedSubs } from '$lib/stores/redditHistory'
+
+	type LinkItem = {
+		href: string
+		label: string
+	}
+
+	const pinnedSubs: LinkItem[] = [
+		{ href: '/r/pics', label: '/r/pics' },
+		{ href: '/r/oldschoolcool', label: '/r/oldschoolcool' },
+		{ href: '/r/itookapicture', label: '/r/itookapicture' },
+		{ href: '/r/Pareidolia', label: '/r/Pareidolia' },
+	]
 </script>
 
 <header>
@@ -11,18 +24,31 @@
 			<path d="M0,0 L1,2 C1.5,3 1.5,3 2,3 L2,0 Z" />
 		</svg>
 		<ul>
-			<li aria-current={$page.url.pathname === '/r/pics' ? 'page' : undefined}>
-				<a href="/r/pics">/r/pics</a>
-			</li>
-			<li aria-current={$page.url.pathname === '/r/oldschoolcool' ? 'page' : undefined}>
-				<a href="/r/oldschoolcool">/r/oldschoolcool</a>
-			</li>
-			<li aria-current={$page.url.pathname === '/r/itookapicture' ? 'page' : undefined}>
-				<a href="/r/itookapicture">/r/itookapicture</a>
-			</li>
-			<li aria-current={$page.url.pathname === '/r/Pareidolia' ? 'page' : undefined}>
-				<a href="/r/Pareidolia">/r/Pareidolia</a>
-			</li>
+			{#each pinnedSubs as link}
+				<li aria-current={$page.url.pathname === link.href ? 'page' : undefined}>
+					<a href={link.href}>{link.label}</a>
+				</li>
+			{/each}
+
+			{#if $visitedSubs.length > 0}
+				<li class="history-separator" aria-hidden="true">|</li>
+				{#each $visitedSubs as item (item.sub)}
+					<li
+						class="history-item"
+						aria-current={$page.url.pathname === `/r/${item.sub}` ? 'page' : undefined}
+					>
+						<a href={`/r/${item.sub}`}>/r/{item.sub}</a>
+						<button
+							type="button"
+							class="remove-history"
+							on:click={() => removeVisitedSub(item.sub)}
+							aria-label={`Remove /r/${item.sub} from recent subreddits`}
+						>
+							x
+						</button>
+					</li>
+				{/each}
+			{/if}
 		</ul>
 		<svg viewBox="0 0 2 3" aria-hidden="true">
 			<path d="M0,0 L0,3 C0.5,3 0.5,3 1,2 L2,0 Z" />
@@ -88,11 +114,15 @@
 		list-style: none;
 		background: var(--color-bg-2);
 		background-size: contain;
+		overflow-x: auto;
+		white-space: nowrap;
 	}
 
 	li {
 		position: relative;
 		height: 100%;
+		display: flex;
+		align-items: center;
 	}
 
 	li[aria-current='page']::before {
@@ -121,7 +151,29 @@
 		transition: color 0.2s linear;
 	}
 
-	a:hover {
+	.history-separator {
+		padding: 0 0.5rem;
+		opacity: 0.5;
+	}
+
+	.history-item a {
+		padding-right: 0.2rem;
+	}
+
+	.remove-history {
+		border: 0;
+		background: transparent;
+		color: var(--color-text);
+		cursor: pointer;
+		font-size: 0.8rem;
+		line-height: 1;
+		padding: 0 0.45rem 0 0.15rem;
+		height: 100%;
+		text-transform: uppercase;
+	}
+
+	a:hover,
+	.remove-history:hover {
 		color: var(--color-theme-1);
 	}
 </style>
