@@ -4,27 +4,22 @@ import type { PageLoadEvent } from './$types'
 export async function load({ params, fetch }: PageLoadEvent) {
 	const { slug } = params
 
-	try {
-		const response = await fetch(`/api/reddit?subReddit=${encodeURIComponent(slug)}`)
+	const response = await fetch(`/api/reddit?subReddit=${encodeURIComponent(slug)}`)
 
-		if (!response.ok) {
-			error(response.status, `Failed to load subreddit: ${response.statusText}`)
-		}
+	if (!response.ok) {
+		error(response.status, `Failed to load subreddit: ${response.statusText}`)
+	}
 
-		const data = await response.json()
+	const data = await response.json()
 
-		if (data.error) {
-			error(404, data.error)
-		}
+	if (data.error) {
+		error(404, data.error)
+	}
 
-		return {
-			sub: slug,
-			posts: data.posts,
-			after: data.after,
-			hasMore: data.hasMore,
-		}
-	} catch (err) {
-		console.error('Error loading subreddit:', err)
-		error(500, 'Failed to load subreddit data')
+	return {
+		sub: slug,
+		posts: data.posts,
+		after: data.after,
+		hasMore: data.hasMore,
 	}
 }

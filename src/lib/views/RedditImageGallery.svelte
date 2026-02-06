@@ -207,12 +207,18 @@
 					currentGalleryIndex += 1
 				} else if (offset < 0 && currentGalleryIndex > 0) {
 					currentGalleryIndex -= 1
+				} else {
+					const currentIndex = filteredPosts.indexOf(fullScreenPost)
+					const nextPost = filteredPosts.at((currentIndex + offset) % filteredPosts.length)
+					if (nextPost) {
+						currentGalleryIndex = 0
+						fullScreenPost = nextPost
+					}
 				}
 			}
 		} else if (fullScreenPost.type === 'image') {
-			const imgPosts = filteredPosts.filter((post) => post.type === 'image')
-			const currentIndex = imgPosts.indexOf(fullScreenPost)
-			const nextPost = imgPosts.at((currentIndex + offset) % imgPosts.length)
+			const currentIndex = filteredPosts.indexOf(fullScreenPost)
+			const nextPost = filteredPosts.at((currentIndex + offset) % filteredPosts.length)
 			if (nextPost) {
 				fullScreenPost = nextPost
 			}
